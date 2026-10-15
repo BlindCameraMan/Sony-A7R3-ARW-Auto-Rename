@@ -44,10 +44,10 @@ Using Phil Harvey's [Exiftool](https://exiftool.org/) and [PyExiftool](https://g
 
  - **Pixel_Shift**: DateTime_Pixel_Shift_SeqNumberOfSeqTotal_OriginalName
 
-2026-07-22_16-51-57_Pixel_Shift_1of4_DSC04398.ARW
-2026-07-22_16-51-57_Pixel_Shift_2of4_DSC04398.ARW
-2026-07-22_16-51-57_Pixel_Shift_3of4_DSC04398.ARW
-2026-07-22_16-51-57_Pixel_Shift_4of4_DSC04398.ARW
+2026-07-22_16-51-57_Pixel_Shift_001_1of4_DSC04398.ARW
+2026-07-22_16-51-57_Pixel_Shift_001_2of4_DSC04398.ARW
+2026-07-22_16-51-57_Pixel_Shift_001_3of4_DSC04398.ARW
+2026-07-22_16-51-57_Pixel_Shift_001_4of4_DSC04398.ARW
 
 The script will list all the renames and ask to confirm before the rename is initiated.
 

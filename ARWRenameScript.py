@@ -17,9 +17,12 @@ prev_seq_num = None
 burst_counter = 0
 pixel_shift_enabled = False
 pixel_shift_group = None
+prev_pixel_shift_group = None
 pixel_shift_seq_num = None
 pixel_shift_seq_len = None
 pixel_shift_seq_ID = None
+prev_pixel_shift_seq_ID = None
+pixel_shift_group_num = 0
 photo_tags = [
     "EXIF:DateTimeOriginal",
     "MakerNotes:SequenceImageNumber",
@@ -34,7 +37,7 @@ photo_tags = [
 # print("Moving To Test Direcotry")
 # os.chdir('test photos\Pixelshift')
 print("ARW Rename Script")
-print("Last Updated: Oct 12 2026")
+print("Last Updated: Oct 15 2026")
 print("Searching for ARW files in: ", os.getcwd())
         
 #Find ARW files and put them in a list called arw_files
@@ -44,7 +47,7 @@ with os.scandir() as ArwListEntries:
   if entry.is_file() and entry.name.lower().endswith('.arw'):
    arw_files.append(entry.name)
 #print(arw_files)
-print("Number of ARW Files is ", len(arw_files))
+print("Number of ARW Files is", len(arw_files))
 #Scan for the tags needed in metadata with pyexiftool.
 #scan list arw_files for photo_tags
 rename_queue = []
@@ -76,15 +79,23 @@ with ExifToolHelper() as et:
             iso_datetime = "NoDate"
         if pixel_shift_raw == "00000000 0 0 0x0":
             pixel_shift_enabled = False
-            pixel_shift_group = None
-            pixel_shift_seq_num = None
-            pixel_shift_seq_len = None
-            pixel_shift_seq_ID = None
+#             pixel_shift_group = None
+#             prev_pixel_shift_group = None
+#             pixel_shift_seq_num = None
+#             pixel_shift_seq_len = None
+#             pixel_shift_seq_ID = None
+#             prev_pixel_shift_seq_ID = None
         if pixel_shift_raw != "00000000 0 0 0x0":
             try:
 #                 print(pixel_shift_raw)
                 pixel_shift_group, pixel_shift_seq_num, pixel_shift_seq_len, pixel_shift_seq_ID = pixel_shift_raw.split(' ', 3)
                 pixel_shift_enabled = True
+                if ((pixel_shift_group != prev_pixel_shift_group) and (pixel_shift_seq_ID != prev_pixel_shift_seq_ID)) or pixel_shift_group_num == 0:
+                    pixel_shift_group_num = pixel_shift_group_num + 1
+                    prev_pixel_shift_group = pixel_shift_group
+                    prev_pixel_shift_seq_ID = pixel_shift_seq_ID
+                else:
+                    pixel_shift_group_num = pixel_shift_group_num
 #                 print(pixel_shift_enabled, pixel_shift_group, pixel_shift_seq_num, pixel_shift_seq_len, pixel_shift_seq_ID)
             except ValueError:
                 pixel_shift_enabled = False
@@ -102,6 +113,7 @@ with ExifToolHelper() as et:
             'pixel_shift_seq_num': pixel_shift_seq_num,
             'pixel_shift_seq_len': pixel_shift_seq_len,
             'pixel_shift_seq_ID': pixel_shift_seq_ID,
+            'pixel_shift_group_num': f'{pixel_shift_group_num:03}'
         }
         file_data_list.append(file_entry)
 #             print(f"Added {file_entry['filename']} (List Length: {len(file_data_list)})")
@@ -124,6 +136,7 @@ for i, item in enumerate(file_data_list):
         pixel_shift_seq_num = item['pixel_shift_seq_num']
         pixel_shift_seq_len = item['pixel_shift_seq_len']
         pixel_shift_seq_ID = item['pixel_shift_seq_ID']
+        pixel_shift_group_num = item['pixel_shift_group_num']
         # Prepare filename components
         name_base, ext = os.path.splitext(filename)
         new_filename = ""
@@ -185,7 +198,7 @@ for i, item in enumerate(file_data_list):
                 # Format: DateTime_DRO_Bracket_SeqOfTotal_OriginalName
                 new_name_base = f"{iso_datetime}_DRO_Bracket_{seq_num}of{seq_len}_{name_base}"
         elif Shot_Type == "Pixel_Shift":
-                new_name_base = f"{iso_datetime}_Pixel_Shift_{pixel_shift_seq_num}of{pixel_shift_seq_len}_{name_base}"
+                new_name_base = f"{iso_datetime}_Pixel_Shift_{pixel_shift_group_num}_{pixel_shift_seq_num}of{pixel_shift_seq_len}_{name_base}"
         else:
                 # Single Shot: DateTime_OriginalName
                 new_name_base = f"{iso_datetime}_{name_base}"
